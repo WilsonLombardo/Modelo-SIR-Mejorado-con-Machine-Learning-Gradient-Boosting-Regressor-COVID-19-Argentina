@@ -1,205 +1,104 @@
-Modelo SIR Mejorado con Machine Learning para COVID-19 en Argentina
-Descripción
-Este proyecto implementa un modelo epidemiológico basado en la clásica dinámica SIR (Susceptibles-Infectados-Recuperados) para analizar y simular la evolución del COVID-19 en Argentina.
+# Modelo SIR Mejorado con Machine Learning para COVID-19 en Argentina
 
-La particularidad es que los parámetros clave del modelo, la tasa de transmisión 
-𝛽
-(
-𝑡
-)
-β(t) y la tasa de recuperación/remoción 
-𝛾
-(
-𝑡
-)
-γ(t), son estimados dinámicamente mediante modelos de Machine Learning usando datos reales disponibles a nivel nacional y provincial.
+## Descripción
 
-Estructura del Proyecto
-Argentina-covid19.csv — Datos nacionales diarios de COVID-19.
+Este proyecto implementa un modelo epidemiológico basado en la clásica dinámica SIR (Susceptibles-Infectados-Recuperados) para analizar y simular la evolución del COVID-19 en Argentina. 
 
-Argentina-covid19-por-provincia.csv — Datos provinciales diarios.
+La particularidad es que los parámetros clave del modelo, la tasa de transmisión **β(t)** y la tasa de recuperación **γ(t)**, son estimados dinámicamente mediante modelos de Machine Learning utilizando datos reales disponibles a nivel nacional y provincial.
 
-Argentina-covid19-fallecidos.csv — Datos de fallecidos con detalles demográficos.
+---
 
-sir_ml_model.py — Script principal que carga datos, entrena los modelos y simula la evolución SIR.
+## Estructura del Proyecto
 
-README.md — Este archivo.
+- `Argentina-covid19.csv` — Datos nacionales diarios de COVID-19.
+- `Argentina-covid19-por-provincia.csv` — Datos provinciales diarios.
+- `Argentina-covid19-fallecidos.csv` — Datos de fallecidos con detalles demográficos.
+- `sir_ml_model.py` — Script principal que carga datos, entrena los modelos y simula la evolución SIR.
+- `README.md` — Este archivo.
 
-Descripción del Código
-1. Carga y Preprocesamiento
-Se leen y combinan tres fuentes de datos con información nacional, provincial y de fallecidos.
+---
 
-Se crean variables epidemiológicas clave:
+## Descripción del Código
 
-Infectados activos 
-𝐼
-I, recuperados/removidos 
-𝑅
-R, susceptibles 
-𝑆
-S.
+### 1. Carga y Preprocesamiento
 
-Variables auxiliares: positividad, gravedad (uso UTI), edad promedio de fallecidos, etc.
+- Se combinan fuentes de datos nacionales, provinciales y de fallecidos.
+- Se construyen variables clave:
+  - Infectados activos (`I`)
+  - Recuperados (`R`)
+  - Susceptibles (`S`)
+  - Positividad (tests positivos / tests realizados)
+  - Gravedad (UTI ocupadas / casos activos)
+  - Edad promedio de fallecidos, etc.
+- Se filtran días con baja cantidad de casos activos y se completan datos faltantes.
 
-Se limpian y rellenan datos faltantes para garantizar consistencia.
+### 2. Simulador SIR
 
-Se establece un umbral mínimo de infectados para análisis (>100 activos).
+- Se implementa el modelo clásico de ecuaciones diferenciales discretizadas.
+- Se usa una población total de 45 millones.
+- Se simula la evolución de S, I y R en función de los parámetros estimados.
 
-2. Simulación SIR Mejorada
-La evolución del sistema SIR se modela usando los parámetros dinámicos 
-𝛽
-(
-𝑡
-)
-β(t) y 
-𝛾
-(
-𝑡
-)
-γ(t) estimados.
+### 3. Entrenamiento con Machine Learning
 
-Se calcula la variación diaria de susceptibles, infectados y recuperados.
+- Se calculan las tasas empíricas diarias de β y γ.
+- Se suavizan los valores con filtros gaussianos.
+- Se entrena un modelo de regresión por Gradient Boosting para predecir:
+  - **β(t)**: tasa de contagio
+  - **γ(t)**: tasa de recuperación
+- Variables utilizadas (features):
+  - `dia_cuarentena`, `positividad`, `gravedad`, `edad_mean`, 
+    `casos_nuevos_prov`, `UTI_%Nacion`, `mes`, `semana`, `tendencia_I`
 
-3. Entrenamiento de Modelos de Machine Learning
-Se calculan valores empíricos diarios para 
-𝛽
-β y 
-𝛾
-γ a partir de diferencias numéricas y poblaciones.
+### 4. Evaluación y Visualización
 
-Se suavizan estos valores para evitar ruido.
+- Se simula el modelo SIR usando los parámetros estimados.
+- Se calculan métricas:
+  - MSE (Error Cuadrático Medio)
+  - R² (Coeficiente de Determinación)
+- Se grafican:
+  - Infectados reales vs simulados
+  - Evolución de β(t) y γ(t)
+  - Número de reproducción R₀(t) = β(t) / γ(t)
 
-Se seleccionan características explicativas relevantes:
+---
 
-Variables temporales: día de cuarentena, mes, semana.
+## Cómo Ejecutar
 
-Indicadores epidemiológicos: positividad, gravedad, casos nuevos provinciales.
+1. Asegurate de tener los tres archivos `.csv` en la misma carpeta.
+2. Instalá las dependencias necesarias:
+   ```bash
+   pip install pandas numpy matplotlib scikit-learn scipy
+   ```
+3. Ejecutá el script:
+   ```bash
+   python sir_ml_model.py
+   ```
 
-Datos demográficos: edad promedio fallecidos, porcentaje de UTI ocupadas.
+---
 
-Tendencias de infectados.
+## Tecnologías Utilizadas
 
-Se entrenan dos modelos de regresión con Gradient Boosting Regressor para 
-𝛽
-(
-𝑡
-)
-β(t) y 
-𝛾
-(
-𝑡
-)
-γ(t).
+- **Python 3.x**
+- **Pandas** — manipulación de datos
+- **NumPy** — cálculos numéricos
+- **Matplotlib** — visualización
+- **Scikit-learn** — modelos de Machine Learning (Gradient Boosting)
+- **SciPy** — filtros y suavizado de datos
 
-Se obtienen predicciones para todos los días.
+---
 
-4. Evaluación y Visualización
-Se simula la evolución SIR con los parámetros estimados.
+## Posibles Mejoras
 
-Se calculan métricas de calidad:
+- Agregar variables de movilidad o vacunación
+- Validación cruzada y tuning de hiperparámetros
+- Modelos regionales (por provincia)
+- Uso de modelos no paramétricos o redes neuronales
 
-Error cuadrático medio (MSE).
+---
 
-Coeficiente de determinación (R²).
+## Autor
 
-Se grafican:
+**Wilson Lombardo**
 
-Infectados reales vs. simulados.
-
-Evolución temporal de 
-𝛽
-(
-𝑡
-)
-β(t) y 
-𝛾
-(
-𝑡
-)
-γ(t).
-
-Número reproductivo básico estimado 
-𝑅
-0
-(
-𝑡
-)
-=
-𝛽
-(
-𝑡
-)
-𝛾
-(
-𝑡
-)
-R 
-0
-​
- (t)= 
-γ(t)
-β(t)
-​
- .
-
-Cómo Ejecutar
-Asegúrate de tener los archivos CSV en la carpeta del proyecto.
-
-Instala las dependencias necesarias:
-
-bash
-Copiar
-Editar
-pip install pandas numpy matplotlib scikit-learn scipy
-Ejecuta el script:
-
-bash
-Copiar
-Editar
-python sir_ml_model.py
-Observa las métricas impresas y las gráficas generadas que muestran el ajuste y dinámica de la epidemia.
-
-Tecnologías Utilizadas
-Python 3.x
-
-Pandas para manipulación de datos.
-
-NumPy para cálculos numéricos.
-
-Matplotlib para visualizaciones.
-
-Scikit-learn para modelos de Machine Learning (Gradient Boosting Regressor).
-
-SciPy para filtrado y suavizado de señales.
-
-Notas Importantes
-El modelo asume una población fija (45 millones) y condiciones homogéneas a nivel nacional.
-
-El entrenamiento depende de la calidad y consistencia de los datos originales.
-
-La predicción de 
-𝛽
-(
-𝑡
-)
-β(t) y 
-𝛾
-(
-𝑡
-)
-γ(t) permite adaptar el modelo SIR a cambios en políticas, comportamiento social, y características epidemiológicas.
-
-El enfoque puede extenderse para incorporar más covariables o modelos más complejos.
-
-Posibles Mejoras
-Integrar datos de movilidad o vacunación.
-
-Evaluar otros modelos ML o deep learning para estimar parámetros.
-
-Incorporar variabilidad regional mediante modelos espaciales.
-
-Hacer validación cruzada y ajuste fino de hiperparámetros ML.
-
-Autor
-Wilson Lombardo
+---
 
