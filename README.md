@@ -9,7 +9,8 @@ La particularidad es que los par√°metros clave del modelo, la tasa de transmisi√
 ![Datos reales vs simulados](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/Datos%20Reales%20vs%20SImulados.png)
 
 ![importancia features 1](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/importancia%20features.png)
-!importancia features 2](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/importancia%20features%201.png)
+
+![importancia features 2](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/importancia%20features%201.png)
 ---
 
 ## Estructura del Proyecto
