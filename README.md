@@ -1,4 +1,4 @@
-# Modelo SIR Mejorado con Machine Learning para COVID-19 en Argentina
+# Modelo SIR Mejorado con Machine Learning (Gradient Boosting Regressor)para COVID-19 en Argentina
 
 ## Descripción
 
