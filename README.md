@@ -13,7 +13,7 @@ La particularidad es que los parámetros clave del modelo, la tasa de transmisi�
 - `Argentina-covid19.csv` — Datos nacionales diarios de COVID-19.
 - `Argentina-covid19-por-provincia.csv` — Datos provinciales diarios.
 - `Argentina-covid19-fallecidos.csv` — Datos de fallecidos con detalles demográficos.
-- `sir_ml_model.py` — Script principal que carga datos, entrena los modelos y simula la evolución SIR.
+- `Machine_Learning_Gradient_Boosting_Regressor_COVID_19.ipynb` — Script principal que carga datos, entrena los modelos y simula la evolución SIR.
 - `README.md` — Este archivo.
 
 ---
