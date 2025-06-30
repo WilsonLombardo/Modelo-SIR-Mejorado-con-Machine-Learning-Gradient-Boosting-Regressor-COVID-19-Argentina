@@ -6,6 +6,7 @@ Este proyecto implementa un modelo epidemiológico basado en la clásica dinámi
 
 La particularidad es que los parámetros clave del modelo, la tasa de transmisión **β(t)** y la tasa de recuperación **γ(t)**, son estimados dinámicamente mediante modelos de Machine Learning utilizando datos reales disponibles a nivel nacional y provincial.
 
+![Datos reales vs simulados](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/Datos%20Reales%20vs%20SImulados.png)
 ---
 
 ## Estructura del Proyecto
