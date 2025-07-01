@@ -13,6 +13,15 @@ La particularidad es que los parámetros clave del modelo, la tasa de transmisi�
 ![importancia features 2](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/importancia%20features%201.png)
 ---
 Inclusive con otro Dataframe sigue validando el modelo
+
+
+![importancia features 3]([https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/importancia%20features%201.png](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/features%202.png))
+
+
+![importancia features 4](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/features%203.png)
+
+
+![importancia features 5](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/dat%20R%20vs%20S.png)
 ## Estructura del Proyecto
 
 - `Argentina-covid19.csv` — Datos nacionales diarios de COVID-19.
