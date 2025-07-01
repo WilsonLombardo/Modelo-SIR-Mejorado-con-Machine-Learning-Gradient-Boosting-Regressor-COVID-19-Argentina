@@ -1,0 +1,165 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+from scipy.ndimage import gaussian_filter1d
+
+# =============================
+# 1. CARGA Y PREPROCESAMIENTO
+# =============================
+def cargar_datos_nuevo():
+    # Cargar datos asegurando el parseo correcto de fechas
+    df = pd.read_csv("Covid19arData - historico.csv", parse_dates=["fecha"], dayfirst=True)
+    
+    # Filtrar solo datos de Argentina
+    df = df[df["osm_admin_level_2"] == "Argentina"]
+    
+    # Convertir columnas numéricas (manejo de errores para strings)
+    numeric_cols = ['tot_casosconf', 'nue_casosconf_diff', 'tot_fallecidos', 'tot_recuperados']
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+    
+    # Ordenar por fecha y resetear índice
+    df = df.sort_values("fecha").reset_index(drop=True)
+    
+    # Calcular variables SIR
+    N = 45_000_000  # Población de Argentina
+    
+    # Asegurar que los valores sean acumulativos
+    df['tot_casosconf'] = df['tot_casosconf'].cummax()
+    df['tot_fallecidos'] = df['tot_fallecidos'].cummax()
+    df['tot_recuperados'] = df['tot_recuperados'].cummax()
+    
+    # Calcular infectados activos
+    df['I'] = df['tot_casosconf'] - df['tot_recuperados'] - df['tot_fallecidos']
+    df['R'] = df['tot_recuperados'] + df['tot_fallecidos']
+    df['S'] = N - df['I'] - df['R']
+    
+    # Feature engineering
+    df['dia_cuarentena'] = df['dia_inicio'].fillna(0)
+    df['mes'] = df['fecha'].dt.month
+    df['semana'] = df['fecha'].dt.isocalendar().week.astype(int)
+    df['nue_casos'] = df['tot_casosconf'].diff().fillna(0)
+    
+    # Filtrar para tener datos con suficiente cantidad de infectados
+    df = df[df['I'] > 100].reset_index(drop=True)
+    
+    return df
+
+# =============================
+# 2. SIMULADOR SIR
+# =============================
+def simular_sir(beta_t, gamma_t, df):
+    N = 45_000_000
+    S, I, R = [df['S'].iloc[0]], [df['I'].iloc[0]], [df['R'].iloc[0]]
+
+    for t in range(1, len(df)):
+        beta = beta_t[t]
+        gamma = gamma_t[t]
+        dS = -beta * S[-1] * I[-1] / N
+        dI = beta * S[-1] * I[-1] / N - gamma * I[-1]
+        dR = gamma * I[-1]
+
+        S.append(S[-1] + dS)
+        I.append(I[-1] + dI)
+        R.append(R[-1] + dR)
+
+    return np.array(S), np.array(I), np.array(R)
+
+# =============================
+# 3. ENTRENAMIENTO ML
+# =============================
+def entrenar_modelos(df):
+    I = df['I'].values
+    R = df['R'].values
+    
+    # Calcular derivadas numéricas
+    dI = np.gradient(I)
+    dR = np.gradient(R)
+    
+    # Calcular beta y gamma empíricos
+    S = df['S'].values
+    epsilon = 1e-8  # Para evitar divisiones por cero
+    beta_emp = (dI + dR) * 45_000_000 / (S * I + epsilon)
+    gamma_emp = dR / (I + epsilon)
+    
+    # Suavizar las estimaciones
+    beta_emp = gaussian_filter1d(np.clip(beta_emp, 0, 3.0), sigma=1.2)
+    gamma_emp = gaussian_filter1d(np.clip(gamma_emp, 0, 1.5), sigma=1.5)
+    
+    # Preparar features para el modelo
+    features = ['dia_cuarentena', 'nue_casos', 'mes', 'semana']
+    X = df[features].fillna(0)
+    
+    # Entrenar modelos
+    model_beta = GradientBoostingRegressor(n_estimators=500, max_depth=7, learning_rate=0.03, subsample=0.8)
+    model_gamma = GradientBoostingRegressor(n_estimators=500, max_depth=5, learning_rate=0.03, subsample=0.8)
+    
+    model_beta.fit(X, beta_emp)
+    model_gamma.fit(X, gamma_emp)
+    
+    # Predecir parámetros
+    beta_pred = model_beta.predict(X)
+    gamma_pred = model_gamma.predict(X)
+    
+    return model_beta, model_gamma, beta_pred, gamma_pred
+
+# =============================
+# 4. MÉTRICAS Y GRAFICACIÓN
+# =============================
+def mostrar_metricas(df, I_sim, R_sim):
+    print("\n--- Métricas del modelo ---")
+    print(f"MSE Infectados: {mean_squared_error(df['I'], I_sim):,.0f}")
+    print(f"R² Infectados: {r2_score(df['I'], I_sim):.3f}")
+    print(f"MSE Recuperados: {mean_squared_error(df['R'], R_sim):,.0f}")
+    print(f"R² Recuperados: {r2_score(df['R'], R_sim):.3f}")
+
+def evaluar_y_graficar(df, beta_t, gamma_t):
+    S_sim, I_sim, R_sim = simular_sir(beta_t, gamma_t, df)
+    
+    mostrar_metricas(df, I_sim, R_sim)
+    print(f"R0 promedio estimado: {np.mean(beta_t / gamma_t):.2f}")
+
+    plt.figure(figsize=(14, 6))
+    plt.plot(df['fecha'], df['I'], label='Infectados reales', color='red')
+    plt.plot(df['fecha'], I_sim, label='Infectados simulados', linestyle='--', color='blue')
+    plt.legend()
+    plt.title("Infectados: Reales vs. Simulados")
+    plt.ylabel("Número de personas")
+    plt.grid(True)
+    plt.show()
+
+    plt.figure(figsize=(14, 4))
+    plt.plot(df['fecha'], beta_t, label='β(t) estimado', color='orange')
+    plt.plot(df['fecha'], gamma_t, label='γ(t) estimado', color='green')
+    plt.legend()
+    plt.title("Parámetros dinámicos estimados por ML")
+    plt.grid(True)
+    plt.show()
+
+    R0_t = beta_t / gamma_t
+    plt.figure(figsize=(14, 4))
+    plt.plot(df['fecha'], R0_t, label='R₀(t)', color='purple')
+    plt.axhline(1.0, color='gray', linestyle='--', label='Umbral epidémico (R₀=1)')
+    plt.legend()
+    plt.title("Número de reproducción básico estimado R₀(t)")
+    plt.grid(True)
+    plt.show()
+
+# =============================
+# 5. MAIN
+# =============================
+if __name__ == "__main__":
+    print("Cargando y procesando datos...")
+    df = cargar_datos_nuevo()
+    
+    print("\nVariables disponibles:", df.columns.tolist())
+    print("Rango temporal:", df['fecha'].min(), "a", df['fecha'].max())
+    print("Número de registros:", len(df))
+    
+    print("\nEntrenando modelos...")
+    model_beta, model_gamma, beta_pred, gamma_pred = entrenar_modelos(df)
+    
+    print("\nEvaluando modelo...")
+    evaluar_y_graficar(df, beta_pred, gamma_pred)
