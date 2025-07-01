@@ -15,7 +15,7 @@ La particularidad es que los par√°metros clave del modelo, la tasa de transmisi√
 Inclusive con otro Dataframe sigue validando el modelo
 
 
-![importancia features 3]([https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/importancia%20features%201.png](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/features%202.png))
+![importancia features 3](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/features%202.png)
 
 
 ![importancia features 4](https://github.com/WilsonLombardo/Modelo-SIR-Mejorado-con-Machine-Learning-Gradient-Boosting-Regressor-COVID-19-Argentina/blob/main/features%203.png)
