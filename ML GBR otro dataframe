@@ -1,0 +1,31 @@
+def plot_feature_importance(model, feature_names, title):
+    """Visualiza las importancias de los features para un modelo."""
+    importances = model.feature_importances_
+    indices = np.argsort(importances)[::-1]
+    
+    plt.figure(figsize=(10, 6))
+    plt.title(title)
+    plt.bar(range(len(feature_names)), importances[indices], align='center', color='skyblue')
+    plt.xticks(range(len(feature_names)), np.array(feature_names)[indices], rotation=45)
+    plt.xlabel("Feature")
+    plt.ylabel("Importancia")
+    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+# Llamar a la función después de entrenar los modelos (en el bloque MAIN)
+if __name__ == "__main__":
+    # ... (código existente)
+    
+    print("\nEntrenando modelos...")
+    model_beta, model_gamma, beta_pred, gamma_pred = entrenar_modelos(df)
+    
+    # Obtener nombres de los features
+    features = ['dia_cuarentena', 'nue_casos', 'mes', 'semana']
+    
+    # Visualizar importancias para β y γ
+    plot_feature_importance(model_beta, features, "Importancia de Features para β (tasa de infección)")
+    plot_feature_importance(model_gamma, features, "Importancia de Features para γ (tasa de recuperación)")
+    
+    print("\nEvaluando modelo...")
+    evaluar_y_graficar(df, beta_pred, gamma_pred)
